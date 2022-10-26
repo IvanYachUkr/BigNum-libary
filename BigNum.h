@@ -46,11 +46,11 @@ public:
 //    int shenhage_method_multiplication(std::string first_num, std::string second_num) override;
 //    int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num) override;
     std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num) const;
-    int toom_cook_method_multiplication(std::string first_num, std::string second_num);
+    std::string toom_cook_method_multiplication(std::string first_num, std::string second_num);
     int shenhage_method_multiplication(std::string first_num, std::string second_num);
     int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num);
 };
-
+std::string longDivision(std::string number, int divisor);
 
 
 #endif //LAB2_BIGNUM_H
