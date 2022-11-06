@@ -33,7 +33,8 @@ public:
 
     Big_num operator + (Big_num const &second_term) const;
     Big_num operator - (Big_num const &second_term) const;
-    Big_num operator << (Big_num const &second_term) const;
+    //Big_num operator << (Big_num const &second_term) const;
+    Big_num operator % (Big_num const &second_term) const;
     static std::string convert_decimal_to_binary(std::string num_decimal);
     //std::basic_string<char> karatsuba_algorithm_multiplication(Big_num first_num, Big_num second_num) override;
 
@@ -45,12 +46,12 @@ public:
 //    int toom_cook_method_multiplication(std::string first_num, std::string second_num) override;
 //    int shenhage_method_multiplication(std::string first_num, std::string second_num) override;
 //    int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num) override;
-    std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num) const;
+    static std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num);
     std::string toom_cook_method_multiplication(std::string first_num, std::string second_num);
     int shenhage_method_multiplication(std::string first_num, std::string second_num);
     int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num);
 };
 std::string longDivision(std::string number, int divisor);
-
+std::string reminder(std::string n1, std::string n2);
 
 #endif //LAB2_BIGNUM_H

@@ -84,6 +84,8 @@ std::string longDivision(std::string number, int divisor)
 }
 
 
+
+
 std::string Big_num::sum_big_num(std::string first_number,std::string second_number){
     int len_first_num = first_number.length();
     int len_second_num = second_number.length();
@@ -332,7 +334,7 @@ int Big_num::shtrassen_shenhage_method_multiplication(std::string first_num, std
 }
 
 //std::basic_string<char> Big_num::karatsuba_algorithm_multiplication(Big_num first_n, Big_num second_n) {
-std::basic_string<char> Big_num::karatsuba_algorithm_multiplication(std::string first_n, std::string second_n) const {
+std::basic_string<char> Big_num::karatsuba_algorithm_multiplication(std::string first_n, std::string second_n) {
 
 //    std::string first_num =  first_n.num_decimal;
 //    std::string second_num = second_n.num_decimal;
@@ -410,6 +412,83 @@ std::basic_string<char> Big_num::karatsuba_algorithm_multiplication(std::string 
 
 }
 
+Big_num Big_num::operator%(const Big_num &second_term) const {
+
+    return Big_num();
+}
+std::string reminder(std::string n1, std::string n2){
+    //n1%n2
+    if (n1 == n2){
+        return "0";
+    } else if (n1.compare(n2) > 0) {
+        while (n1.compare(n2) > 0) {
+            std::string n1_copy = n1;
+            std::string n2_copy = n2;
+
+            n2_copy = n2_copy + std::string("0", n2.size() - n1.size() - 1);
+            n1_copy = Big_num::subtract_big_num(n2_copy, n1_copy);
+            n1 = n1_copy;
+        }
+
+    }
+    return n1;
+}
+
+
+
+
+
+
+
+
+
+
+int noOfDigit(long a)
+{
+    int n = 0;
+    while (a > 0)
+    {
+        a /= 10;
+        n++;
+    }
+    return n;
+}
+void schonhageStrassenMultiplication(std::string x, std::string y)
+{
+    int n = x.length();
+    int m = y.length();
+    int linearConvolution[n + m - 1];
+    for (int i = 0; i < (n + m - 1); i++)
+        linearConvolution[i] = 0;
+
+    std::string p = x;
+    for (int i = 0; i < m; i++)
+    {
+        x = p;
+        for (int j = 0; j < n; j++)
+        {
+            linearConvolution[i + j] += ((int)y.back()) * ((int)y.back());
+            x = std::string(x, 0, x.length() - 2);
+        }
+        y = std::string(y, 0, x.length() - 2);
+    }
+
+    std::string product = "0";
+    int nextCarry = 0;
+    std::string base = "1";
+    int b = 1;
+    for (int i = 0; i < n + m - 1; i++)
+    {
+        linearConvolution[i] += nextCarry;
+        //product = Big_num::sum_big_num(product , std::to_string(base * (linearConvolution[i] % 10) ) );
+        product = Big_num::sum_big_num(product , std::to_string((linearConvolution[i] % 10) ) + std::string(b,'0'));
+        nextCarry = linearConvolution[i] / 10;
+        base = Big_num::karatsuba_algorithm_multiplication(base, "10");
+        b++;
+    }
+
+
+}
 
 
 
