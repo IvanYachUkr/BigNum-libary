@@ -53,5 +53,6 @@ public:
 };
 std::string longDivision(std::string number, int divisor);
 std::string reminder(std::string n1, std::string n2);
+std::string division(std::string num, std::string divisor);
 
 #endif //LAB2_BIGNUM_H

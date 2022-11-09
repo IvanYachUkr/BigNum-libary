@@ -489,9 +489,71 @@ void schonhageStrassenMultiplication(std::string x, std::string y)
 
 
 }
+std::string inverse(const std::string& num){
+    int base = num.length();
+//    if (base <= 19){
+//        unsigned long long approx_num = stoi(num.substr(0,base));
+//        long double x = 1.0/approx_num;
+//        return std::to_string(x);
+//    }
+    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base)));
+    long double x = 1.0/approx_num;
+
+    std::string x_str = std::to_string(x);
+    long double x_square = x*x;
+    std::string x_square_str = std::to_string(x_square);
+    if (base <= 19) {
+        return x_str;
+    }
+
+
+    x_str = Big_num::subtract_big_num(
+            Big_num::karatsuba_algorithm_multiplication("2",x_str)
+            ,
+            Big_num::karatsuba_algorithm_multiplication(num, x_square_str)
+            );
+
+}
+std::string inverse_1(const std::string& num){
+    int base = num.length();
+    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base)));
+    long double x = 1.0/approx_num;
+
+    std::string x_str = std::to_string(x);
+    x_str = x_str.substr(0, std::min(50, base/10));
+    return x_str;
+}
 
 
 
+std::string mult_float(const std::string& num1, const std::string& num2){
+    int base1 = num1.length();
+    int base2 = num2.length();
+    int pow_of_ten_1 = base1 - 2;
+    int pow_of_ten_2 = base2 - 2;
+    std::string n1 = num1.substr(2,base1 +1 );
+    std::string n2 = num2.substr(2,base2 +1 );
+
+
+    if (num1.find(',') == std::string::npos){
+        n1 = num1;
+        pow_of_ten_1 = 0;
+    }
+    if (num1.find(',') == std::string::npos){
+        n2 = num2;
+        pow_of_ten_2 = 0;
+    }
+    std::string mult = Big_num::karatsuba_algorithm_multiplication(n1, n2);
+    int mult_len = mult.length();
+    std::string res = reinterpret_cast<const char *>('0' + ',');
+    res = res + std::string( "0",pow_of_ten_1+pow_of_ten_2-mult_len) + mult;
+    return res;
+}
+
+std::string division(std::string num, std::string divisor){
+    std::string divisor_inverse = inverse(divisor);
+    return mult_float(num, divisor_inverse);
+}
 
 
 

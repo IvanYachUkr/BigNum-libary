@@ -254,7 +254,7 @@ bool AKS_test(std::string num){
         i = Big_num::sum_big_num(i, "1");
     }
     while (i < f){
-        first_mult = first_mult ;// /i
+        first_mult = division(first_mult, i) ;// /i
 
     }
     return gcd(first_mult, num) == num;
