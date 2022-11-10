@@ -38,21 +38,23 @@ public:
     static std::string convert_decimal_to_binary(std::string num_decimal);
     //std::basic_string<char> karatsuba_algorithm_multiplication(Big_num first_num, Big_num second_num) override;
 
-    static std::string sum_big_num(std::string first_number,std::string second_number);
-    static std::string subtract_big_num(std::string first_number,std::string second_number);
+
+
 
     static std::string remove_leading_zeros(const std::string& num);
 //    std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num) override;
 //    int toom_cook_method_multiplication(std::string first_num, std::string second_num) override;
 //    int shenhage_method_multiplication(std::string first_num, std::string second_num) override;
 //    int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num) override;
-    static std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num);
+
     std::string toom_cook_method_multiplication(std::string first_num, std::string second_num);
     int shenhage_method_multiplication(std::string first_num, std::string second_num);
     int shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num);
 };
 std::string longDivision(std::string number, int divisor);
-std::string reminder(std::string n1, std::string n2);
+std::string remainder(std::string number, std::string modulo);
 std::string division(std::string num, std::string divisor);
-
+std::string sum_big_num(std::string first_number,std::string second_number);
+std::string subtract_big_num(std::string first_number,std::string second_number);
+std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num);
 #endif //LAB2_BIGNUM_H

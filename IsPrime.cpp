@@ -15,15 +15,15 @@ std::string power(std::string n, std::string a = "23", std::string p ="1")
         int last_digit = (int)p.back();
         if (last_digit & 1) {
 
-            res = (Big_num::karatsuba_algorithm_multiplication(res,a));
+            res = (karatsuba_algorithm_multiplication(res,a));
 
             if (res.compare(n)<0) {
-                res = reminder(res, n);
+                res = remainder(res, n);
             }
         }
         // n must be even now
         p = longDivision(p, 2); // n = n/2
-        a = reminder((Big_num::karatsuba_algorithm_multiplication(a,a)) , n);
+        a = remainder((karatsuba_algorithm_multiplication(a, a)), n);
     }
     return res;
 }
@@ -33,9 +33,9 @@ std::string gcd(std::string a, std::string b)
 {
     if(a.compare(b) < 0)
         return gcd(b, a);
-    else if(reminder(a,b) == "0")
+    else if(remainder(a, b) == "0")
         return b;
-    else return gcd(b, reminder(a,b));
+    else return gcd(b, remainder(a, b));
 }
 
 // If n is prime, then always returns true, If n is
@@ -60,7 +60,7 @@ bool isPrime(std::string n, int k)
             return false;
 
         // Fermat's little theorem
-        if (power(a, Big_num::subtract_big_num(n, "1")) != "1")
+        if (power(a, subtract_big_num(n, "1")) != "1")
             return false;
 
         k--;
@@ -85,7 +85,7 @@ bool miillerTest(std::string d, std::string n)
     std::string a = "43";
     // Compute a^d % n
     std::string x = power(n,a,d);
-    std::string n_minus_one = Big_num::subtract_big_num(n, "1");
+    std::string n_minus_one = subtract_big_num(n, "1");
     if (x == "1"  || x == n_minus_one)
         return true;
 
@@ -96,8 +96,8 @@ bool miillerTest(std::string d, std::string n)
     // (iii) (x^2) % n is not n-1
     while (d != n_minus_one)
     {
-        x = reminder((Big_num::karatsuba_algorithm_multiplication(x,x)) , n);
-        d = Big_num::karatsuba_algorithm_multiplication(d, "2");
+        x = remainder((karatsuba_algorithm_multiplication(x, x)), n);
+        d = karatsuba_algorithm_multiplication(d, "2");
 
         if (x == "1")      return false;
         if (x == "n-1")    return true;
@@ -117,8 +117,8 @@ bool isPrime_Miller(std::string n, int k)
     if (n <= "3") return true;
 
     // Find r such that n = 2^d * r + 1 for some r >= 1
-    std::string d = Big_num::subtract_big_num(n, "1");;
-    while (reminder(d,"2") == "0")
+    std::string d = subtract_big_num(n, "1");;
+    while (remainder(d, "2") == "0")
         d = longDivision(d, 2);
 
     // Iterate given number of 'k' times
@@ -138,14 +138,14 @@ std::string modulo(std::string base, std::string exponent,
     while (exponent > "0")
     {
         if ((int)exponent.back() %2 == 1)
-            x = reminder(Big_num::karatsuba_algorithm_multiplication(x , y) , mod);
+            x = remainder(karatsuba_algorithm_multiplication(x, y), mod);
 
 
-        y = reminder(Big_num::karatsuba_algorithm_multiplication(y , y) , mod);
+        y = remainder(karatsuba_algorithm_multiplication(y, y), mod);
         exponent = longDivision(exponent , 2);
     }
 
-    return reminder(x, mod);
+    return remainder(x, mod);
 }
 
 // To calculate Jacobian symbol of a given number
@@ -166,19 +166,19 @@ int calculateJacobian(std::string a, std::string n)
         while ( (int)a.back() % 2 == 0 )
         {
             a = longDivision(a,2);
-            if (reminder(n , "8") == "3" || reminder(n,"8") == "5")
+            if (remainder(n, "8") == "3" || remainder(n, "8") == "5")
                 ans = -ans;
 
         }
 
         swap(a, n);
 
-        if (reminder(a, "4") == "3" && reminder(n , "4") != "3")
+        if (remainder(a, "4") == "3" && remainder(n, "4") != "3")
             ans = -ans;
-        a = reminder(a,n);
+        a = remainder(a, n);
 
         if (a > longDivision(n , 2))
-            a = Big_num::subtract_big_num(a , n);
+            a = subtract_big_num(a , n);
 
     }
 
@@ -193,7 +193,7 @@ bool solovoyStrassen(std::string p, int iterations)
 {
     if (p < "2")
         return false;
-    if (p != "2" && reminder(p , "2") == "0")
+    if (p != "2" && remainder(p, "2") == "0")
         return false;
 
     for (int i = 0; i < iterations; i++)
@@ -202,14 +202,14 @@ bool solovoyStrassen(std::string p, int iterations)
         int y = p.size();
         std::string a = std::to_string( (rand() % (std::max(y, 10000) + 23)) );
         std::string jacobian =
-                reminder(
-                (Big_num::sum_big_num(p,
-                                      std::to_string( calculateJacobian(a, p) )
-                                      )
-                                      ) , p);
+                remainder(
+                        (sum_big_num(p,
+                                              std::to_string(calculateJacobian(a, p))
+                        )
+                        ), p);
         std::string mod =
                 modulo(a,
-        longDivision(Big_num::subtract_big_num(p ,"1") , 2),
+        longDivision(subtract_big_num(p ,"1") , 2),
                        p);
 
         if (!jacobian.empty() || mod != jacobian)
@@ -236,7 +236,7 @@ bool check_powers (std::string num) {
 //    std::string m = "2";
 //    unsigned long long  pow = 0;
 //    while (m < num){
-//        m = Big_num::karatsuba_algorithm_multiplication(m, "2");
+//        m = karatsuba_algorithm_multiplication(m, "2");
 //        pow++;
 //    }
 //    unsigned long long square_log_2_n =pow*pow;
@@ -245,13 +245,13 @@ bool check_powers (std::string num) {
 
 
 bool AKS_test(std::string num){
-    std::string first_mult = longDivision(Big_num::sum_big_num(num,"3"), 2);
-    std::string f= longDivision(Big_num::subtract_big_num(num,"1"), 2);
+    std::string first_mult = longDivision(sum_big_num(num,"3"), 2);
+    std::string f= longDivision(subtract_big_num(num,"1"), 2);
     std::string i = "1";
 
-    while (i < Big_num::subtract_big_num(first_mult, "2")){
-        first_mult = Big_num::karatsuba_algorithm_multiplication(first_mult, Big_num::sum_big_num(first_mult, i));
-        i = Big_num::sum_big_num(i, "1");
+    while (i < subtract_big_num(first_mult, "2")){
+        first_mult = karatsuba_algorithm_multiplication(first_mult, sum_big_num(first_mult, i));
+        i = sum_big_num(i, "1");
     }
     while (i < f){
         first_mult = division(first_mult, i) ;// /i
