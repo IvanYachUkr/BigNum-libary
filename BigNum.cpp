@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <regex>
+#include <iomanip>
 #include "BigNum.h"
+
 
 //Overloaded operators
 Big_num Big_num::operator+(const Big_num &second_term) const {
@@ -48,12 +50,27 @@ std::ostream& operator<<(std::ostream& os, const Big_num& bm)
 
 
 
-
+bool compare_nums(std::string n1, std::string n2){
+    int len1 = n1.length();
+    int len2 = n2.length();
+    if (len1 == len2){
+        return n1>n2;
+    }
+    else {
+        return len1>len2;
+    }
+}
 
 
 //+ - Operations
 std::string longDivision(std::string number, int divisor)
 {
+    if ((number.back() - '0')%2 == 1 and divisor == 2){
+        number= subtract_big_num(number, "1");
+    }
+    if (number == "1"){
+        return "0";
+    }
     // As result can be very large store it in string
     std::string ans;
 
@@ -92,6 +109,8 @@ std::string sum_big_num(std::string first_number,std::string second_number){
 
     if (len_first_num > len_second_num)
         swap(first_number, second_number);
+
+    first_number = std::string(abs(len_first_num - len_second_num), '0') + first_number;
 
     std::string res;
 
@@ -133,6 +152,7 @@ std::string subtract_big_num(std::string first_number, std::string second_number
 
 
     reverse(second_number.begin(), second_number.end());
+    reverse(first_number.begin(), first_number.end());
 
     int carry = 0;
 
@@ -167,6 +187,10 @@ std::string subtract_big_num(std::string first_number, std::string second_number
     }
 
     reverse(res.begin(), res.end());
+    res = Big_num::remove_leading_zeros(res);
+    if (res.empty()){
+        res = "0";
+    }
     return res;
 }
 // End of +- operation
@@ -181,9 +205,30 @@ std::string subtract_big_num(std::string first_number, std::string second_number
 
 
 // support functions
-std::string Big_num::convert_decimal_to_binary(std::string num_decimal) {
+std::string convert_decimal_to_binary(std::string num_decimal) {
+    std::string num_binary = "";
+    while (num_decimal > "0"){
+        std::string rem = remainder(num_decimal, "2");
+        num_binary =  rem + num_binary;
+        num_decimal = longDivision(
+                num_decimal.substr(0, num_decimal.length()-1)+
+                        std::to_string(num_decimal.back() - rem[0]),
+                2);
+    }
+    return num_binary;
+}
 
-    return {};
+std::string convert_binary_to_decimal(std::string num_binary) {
+    std::string num_decimal = "";
+    int len_binary = num_binary.length();
+    reverse(num_binary.begin(), num_binary.end());
+    std::string two_to_power = "1";
+    for (int i = 0; i < len_binary; ++i) {
+        std::string pow = num_binary.substr(i, 1);
+        num_decimal = sum_big_num(num_decimal, karatsuba_algorithm_multiplication(two_to_power, pow));
+        two_to_power = karatsuba_algorithm_multiplication(two_to_power, "2");
+    }
+    return num_decimal;
 }
 
 
@@ -212,6 +257,16 @@ std::string Big_num::remove_leading_zeros(const std::string& num) {
 std::string Big_num::toom_cook_method_multiplication(std::string first_num, std::string second_num) {
 
     Big_num n;
+    std::string f_n = first_num;
+    std::string s_n = second_num;
+
+    first_num = convert_decimal_to_binary(first_num);
+    second_num = convert_decimal_to_binary(second_num);
+
+    if (first_num.length()<second_num.length()){
+        swap(first_num, second_num);
+    }
+    second_num = std::string(first_num.length() - second_num.length(), '0') + second_num;
 
     int len_first_num = first_num.size();
 
@@ -227,18 +282,27 @@ std::string Big_num::toom_cook_method_multiplication(std::string first_num, std:
 
 
 
-    std::string  A1 = first_num.substr(0, one_third_numbers_len - 1);
-    std::string  A2 = first_num.substr(one_third_numbers_len, 2 * one_third_numbers_len);
+    std::string  A1 = first_num.substr(0, one_third_numbers_len);
+    std::string  A2 = first_num.substr(one_third_numbers_len, one_third_numbers_len);
     std::string  A3 = first_num.substr(2 * one_third_numbers_len, numbers_len + 1 );
 
-    std::string  B1 = second_num.substr(0, one_third_numbers_len-1);
-    std::string  B2 = second_num.substr(one_third_numbers_len, 2 * one_third_numbers_len);
+    A1 = convert_binary_to_decimal(A1);
+    A2 = convert_binary_to_decimal(A2);
+    A3 = convert_binary_to_decimal(A3);
+
+    std::string  B1 = second_num.substr(0, one_third_numbers_len);
+    std::string  B2 = second_num.substr(one_third_numbers_len, one_third_numbers_len);
     std::string  B3 = second_num.substr(2 * one_third_numbers_len, numbers_len+1);
+
+    B1 = convert_binary_to_decimal(B1);
+    B2 = convert_binary_to_decimal(B2);
+    B3 = convert_binary_to_decimal(B3);
 
     std::string W0 = karatsuba_algorithm_multiplication(A3 , B3);
 
     std::string W1 = karatsuba_algorithm_multiplication(
             sum_big_num( (sum_big_num(A3, A2)), A1),
+
             sum_big_num( (sum_big_num(B3, B2)), B1)
             );
     std::string W2 = karatsuba_algorithm_multiplication(
@@ -308,17 +372,29 @@ std::string Big_num::toom_cook_method_multiplication(std::string first_num, std:
 
                         C3),
             4);
-                    ;
+    C3 = subtract_big_num(C3, karatsuba_algorithm_multiplication("3", C4));
+    C2 = subtract_big_num(C2, karatsuba_algorithm_multiplication("2", C3));
+    C1 = subtract_big_num(C1,  C2);
+
+    C3 = subtract_big_num(C3, karatsuba_algorithm_multiplication("2", C4));
+    C2 = subtract_big_num(C2, C3);
+    C3 = subtract_big_num(C3, C4);
+
     // Adding
-    C4 = C4 + std::string(4 * one_third_numbers_len , '0');
-    C3 = C3 + std::string(3 * one_third_numbers_len , '0');
-    C2 = C2 + std::string(2 * one_third_numbers_len , '0');
-    C1 = C1 + std::string(1 * one_third_numbers_len , '0');
-    C0 = C0;
+//    C4 = C4 + std::string(4 * one_third_numbers_len , '0');
+//    C3 = C3 + std::string(3 * one_third_numbers_len , '0');
+//    C2 = C2 + std::string(2 * one_third_numbers_len , '0');
+//    C1 = C1 + std::string(1 * one_third_numbers_len , '0');
+//    C0 = C0;
     std::string res = "";
-    res = sum_big_num(C4, C3);
-    res = sum_big_num(res, C2);
-    res = sum_big_num(res, C1);
+//    res = sum_big_num(C4, C3);
+//    res = sum_big_num(res, C2);
+//    res = sum_big_num(res, C1);
+//    res = sum_big_num(res, C0);
+    res = karatsuba_algorithm_multiplication("65536", C4);
+    res = sum_big_num(res, karatsuba_algorithm_multiplication("4096", C3));
+    res = sum_big_num(res, karatsuba_algorithm_multiplication("256", C2));
+    res = sum_big_num(res, karatsuba_algorithm_multiplication("16", C1));
     res = sum_big_num(res, C0);
 
     return res;
@@ -334,7 +410,7 @@ int Big_num::shtrassen_shenhage_method_multiplication(std::string first_num, std
 }
 
 //std::basic_string<char> karatsuba_algorithm_multiplication(Big_num first_n, Big_num second_n) {
-std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_n, std::string second_n) {
+std::string karatsuba_algorithm_multiplication(std::string first_n, std::string second_n) {
 
 //    std::string first_num =  first_n.num_decimal;
 //    std::string second_num = second_n.num_decimal;
@@ -349,16 +425,20 @@ std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_n, 
     int len_first_num = first_num.length();
     int len_second_num = second_num.length();
 
-    while (len_second_num > len_first_num) {
-        first_num += "0";
-        len_first_num++;
-    }
+    first_num = std::string(len_second_num - len_first_num, '0') + first_num;
+    len_first_num += len_second_num - len_first_num;
+//    while (len_second_num > len_first_num) {
+//        //first_num += "0";
+//        first_num = "0" + first_num;
+//        len_first_num++;
+//    }
 
     // Base case
     if (len_first_num == 1) {
 
         int ans = stoi(first_num) * stoi(second_num);
-        return std::to_string(ans);
+        std::string ans_str = std::to_string(ans);
+        return ans_str;
     }
 
     // Add zeros in the beginning of
@@ -418,15 +498,17 @@ Big_num Big_num::operator%(const Big_num &second_term) const {
 }
 std::string remainder(std::string number, std::string modulo){
     //number%modulo
+    int a = number.length() - modulo.length();
+    std::string m = std::string(std::max(0,a), '0') + modulo;
     if (number == modulo){
         return "0";
-    } else if (number.compare(modulo) > 0) {
-        while (number.compare(modulo) > 0) {
+    } else if (compare_nums(number, modulo)) { //number.compare(modulo)
+        while ( (number.length() > modulo.length()) or (compare_nums(number , modulo)) ) {
             std::string n1_copy = number;
             std::string n2_copy = modulo;
 
-            n2_copy = n2_copy + std::string("0", modulo.size() - number.size() - 1);
-            n1_copy = subtract_big_num(n2_copy, n1_copy);
+            n2_copy = n2_copy + std::string(number.length() - modulo.length() - (number.length() != modulo.length()), '0');
+            n1_copy = subtract_big_num(number, n2_copy);
             number = n1_copy;
         }
 
@@ -443,17 +525,7 @@ std::string remainder(std::string number, std::string modulo){
 
 
 
-int noOfDigit(long a)
-{
-    int n = 0;
-    while (a > 0)
-    {
-        a /= 10;
-        n++;
-    }
-    return n;
-}
-void schonhageStrassenMultiplication(std::string x, std::string y)
+std::string schonhageStrassenMultiplication(std::string x, std::string y)
 {
     int n = x.length();
     int m = y.length();
@@ -467,28 +539,32 @@ void schonhageStrassenMultiplication(std::string x, std::string y)
         x = p;
         for (int j = 0; j < n; j++)
         {
-            linearConvolution[i + j] += ((int)y.back()) * ((int)y.back());
-            x = std::string(x, 0, x.length() - 2);
+            linearConvolution[i + j] += (y.back()-'0') * (x.back()-'0');
+            x = std::string(x, 0, x.length() - 1);
         }
-        y = std::string(y, 0, x.length() - 2);
+        y = std::string(y, 0, y.length() - 1);
     }
 
     std::string product = "0";
     int nextCarry = 0;
-    std::string base = "1";
-    int b = 1;
+    //std::string base = "";
+    int b = 0;
     for (int i = 0; i < n + m - 1; i++)
     {
         linearConvolution[i] += nextCarry;
         //product = sum_big_num(product , std::to_string(base * (linearConvolution[i] % 10) ) );
         product = sum_big_num(product , std::to_string((linearConvolution[i] % 10) ) + std::string(b,'0'));
         nextCarry = linearConvolution[i] / 10;
-        base = karatsuba_algorithm_multiplication(base, "10");
+        //base = karatsuba_algorithm_multiplication(base, "10");
         b++;
     }
-
+    return product;
 
 }
+
+
+
+
 std::string inverse(const std::string& num){
     int base = num.length();
 //    if (base <= 19){
@@ -496,7 +572,7 @@ std::string inverse(const std::string& num){
 //        long double x = 1.0/approx_num;
 //        return std::to_string(x);
 //    }
-    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base)));
+    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base-1)));
     long double x = 1.0/approx_num;
 
     std::string x_str = std::to_string(x);
@@ -513,45 +589,64 @@ std::string inverse(const std::string& num){
             karatsuba_algorithm_multiplication(num, x_square_str)
             );
 
+    return x_str;
 }
+
+
 std::string inverse_1(const std::string& num){
     int base = num.length();
-    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base)));
+    unsigned long long approx_num = stoll(num.substr(0,std::min(19, base)));
     long double x = 1.0/approx_num;
 
-    std::string x_str = std::to_string(x);
-    x_str = x_str.substr(0, std::min(50, base/10));
+    //std::string z_str = boost::lexical_cast<std::string>(x);
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(base + 2) << x;
+    std::string x_str = stream.str();
+
     return x_str;
 }
 
 
 
 std::string mult_float(const std::string& num1, const std::string& num2){
+    if (num2 == "1"){
+        return num1;
+    }
     int base1 = num1.length();
     int base2 = num2.length();
-    int pow_of_ten_1 = base1 - 2;
+    //int pow_of_ten_1 = base1 - 2;
     int pow_of_ten_2 = base2 - 2;
-    std::string n1 = num1.substr(2,base1 +1 );
+    //std::string n1 = num1.substr(2,base1 +1 );
+    std::string n1 = num1;
     std::string n2 = num2.substr(2,base2 +1 );
+    n2 = Big_num::remove_leading_zeros(n2);
+    //pow_of_ten_2 = pow_of_ten_2 - ()
 
 
-    if (num1.find(',') == std::string::npos){
-        n1 = num1;
-        pow_of_ten_1 = 0;
-    }
-    if (num1.find(',') == std::string::npos){
-        n2 = num2;
-        pow_of_ten_2 = 0;
-    }
+//    if (num1.find(',') == std::string::npos){
+//        n1 = num1;
+//        pow_of_ten_1 = 0;
+    //}
+//    if (num1.find(',') == std::string::npos){
+//        n2 = num2;
+//        pow_of_ten_2 = 0;
+//    }
     std::string mult = karatsuba_algorithm_multiplication(n1, n2);
     int mult_len = mult.length();
-    std::string res = reinterpret_cast<const char *>('0' + ',');
-    res = res + std::string( "0",pow_of_ten_1+pow_of_ten_2-mult_len) + mult;
+    std::string res =std::string( "0",std::max(pow_of_ten_2-mult_len,0)) + mult;
+    res.insert(mult_len-pow_of_ten_2, ".");
+
+    if (res[0] == '.' )
+        res = std::string(1, '0')+".";
+
+
+    //res = res + std::string( "0",pow_of_ten_1+pow_of_ten_2-mult_len) + mult;
+   // res = res + std::string( "0",pow_of_ten_2-mult_len) + mult;
     return res;
 }
 
 std::string division(std::string num, std::string divisor){
-    std::string divisor_inverse = inverse(divisor);
+    std::string divisor_inverse = inverse_1(divisor);
     return mult_float(num, divisor_inverse);
 }
 
