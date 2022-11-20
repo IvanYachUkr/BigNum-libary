@@ -265,53 +265,63 @@ bool solovoyStrassen(std::string p, int iterations)
 
 }
 
+bool isPrimeAKS(unsigned long long int n)
+{
+    std::vector<unsigned long long int> c;
 
-bool check_powers (std::string num) {
+    auto coef = [n,&c]()
+    {
+        int line = n+1;
+        for (unsigned long long  i = 0; i < line/2; i++)
+            c.push_back(1);
 
-    //If n = ab for integers a > 1 and b > 1, output composite.
-    for (unsigned long long b = 2;  std::to_string(b) <= num; b++) {
-        for (unsigned long long a = 2; std::to_string(a) <= num; ++a) {
-                if (power(num,std::to_string(a),std::to_string(b)) == "0") {
-                    return false;
-                }
-            }
+        int C=1;
+        c[0] = C;
+        for (unsigned long long i = 1; i <= line/2-1; i++)
+        {
+            C = C * (line - i) / i;
+            c[i] = C;
+
 
         }
+    };
+    coef();
 
-    return false;
+    int i = n/2;
+    while (i-- && c[i] % n == 0)
+        ;
+
+    return i == 0;
 }
-//std::string find_r(std::string num){
-//    std::string m = "2";
-//    unsigned long long  pow = 0;
-//    while (m < num){
-//        m = karatsuba_algorithm_multiplication(m, "2");
-//        pow++;
-//    }
-//    unsigned long long square_log_2_n =pow*pow;
-//    unsigned long long r =
-//};
+//bool isPrimeAKS(unsigned long long int n)
+//{
+//    std::vector<std::string> c;
+//
+//    auto coef = [n,&c]()
+//    {
+//        int line = n+1;
+//        for (unsigned long long  i = 0; i < line/2; i++)
+//            c.emplace_back("1");
+//
+//        std::string C="1";
+//        c[0] = C;
+//        for (unsigned long long i = 1; i <= line/2-1; i++)
+//        {
+//            C = karatsuba_algorithm_multiplication(C , std::to_string((line - i) / i));
+//            c[i] = C;
+//
+//
+//        }
+//    };
+//    coef();
+//
+//    int i = n/2;
+//    std::string n_str = std::to_string(n);
+//    while (i-- && remainder(c[i] , n_str) == "0")
+//        ;
+//
+//    return i == 0;
+//}
 
 
-bool AKS_test(std::string num){
-    std::string first_mult = longDivision(sum_big_num(num,"3"), 2);
-    std::string mult = first_mult;
-    std::string denom = "1";
-
-    std::string f= longDivision(subtract_big_num(num,"1"), 2);
-    std::string i = "1";
-    std::string j = "1";
-    std::string u = subtract_big_num(num, first_mult);
-    while (compare_nums(sum_big_num(u,"1") , i)){
-        mult = karatsuba_algorithm_multiplication(mult, sum_big_num(first_mult, i));
-        i = sum_big_num(i, "1");
-    }
-    while (compare_nums(f,j)){
-        //mult = division(mult, j) ;// /i
-        denom = karatsuba_algorithm_multiplication(denom, j);
-        j = sum_big_num(j, "1");
-
-    }
-    mult = division(mult, denom);
-    mult = mult.substr(0, mult.find("."));
-    return gcd(mult, num) == num;
-};
+// driver program

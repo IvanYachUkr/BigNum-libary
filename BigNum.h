@@ -64,5 +64,6 @@ std::string subtract_big_num(std::string first_number,std::string second_number)
 std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num);
 std::string schonhageStrassenMultiplication(std::string x, std::string y);
 bool compare_nums(std::string n1, std::string n2);
+std::string inverse(const std::string& num, int k);
 
 #endif //LAB2_BIGNUM_H

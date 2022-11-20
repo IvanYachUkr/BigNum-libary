@@ -11,5 +11,6 @@ bool isPrime_Miller(std::string n, int k);
 bool is_prime_fermat_test(std::string n, int k);
 bool AKS_test(std::string num);
 bool solovoyStrassen(std::string p, int iterations);
+bool isPrimeAKS(unsigned long long int n);
 
 #endif //LAB2_ISPRIME_H

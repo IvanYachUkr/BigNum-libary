@@ -13,11 +13,12 @@ int main() {
     //std::cout << schonhageStrassenMultiplication("1234", "2341") << std::endl; +
     //std::cout << inverse_1("1234", "2341") << std::endl; +
 
-
+    //std::cout<< inverse("531", 3);
+    //std::cout<< subtract_big_num("0531", "00001");
 //    std::cout << solovoyStrassen("13", 3); +
     //std::cout << isPrime_Miller("29", 5);
     //std::cout << isPrime_Miller("29", 5);+
-    //std::cout << AKS_test("29");
+    //std::cout << isPrimeAKS(13);
     //std::cout << remainder("2888794", "9999") << std::endl;
     //std::cout << sum_big_num("1440000000", sum_big_num("0","84020")) << std::endl;
     //std::cout << subtract_big_num("152", "12") << std::endl;

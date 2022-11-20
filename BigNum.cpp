@@ -563,51 +563,6 @@ std::string schonhageStrassenMultiplication(std::string x, std::string y)
 }
 
 
-
-
-std::string inverse(const std::string& num){
-    int base = num.length();
-//    if (base <= 19){
-//        unsigned long long approx_num = stoi(num.substr(0,base));
-//        long double x = 1.0/approx_num;
-//        return std::to_string(x);
-//    }
-    unsigned long long approx_num = stoi(num.substr(0,std::min(19, base-1)));
-    long double x = 1.0/approx_num;
-
-    std::string x_str = std::to_string(x);
-    long double x_square = x*x;
-    std::string x_square_str = std::to_string(x_square);
-    if (base <= 19) {
-        return x_str;
-    }
-
-
-    x_str = subtract_big_num(
-            karatsuba_algorithm_multiplication("2",x_str)
-            ,
-            karatsuba_algorithm_multiplication(num, x_square_str)
-            );
-
-    return x_str;
-}
-
-
-std::string inverse_1(const std::string& num){
-    int base = num.length();
-    unsigned long long approx_num = stoll(num.substr(0,std::min(19, base)));
-    long double x = 1.0/approx_num;
-
-    //std::string z_str = boost::lexical_cast<std::string>(x);
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(base + 2) << x;
-    std::string x_str = stream.str();
-
-    return x_str;
-}
-
-
-
 std::string mult_float(const std::string& num1, const std::string& num2){
     if (num2 == "1"){
         return num1;
@@ -633,17 +588,100 @@ std::string mult_float(const std::string& num1, const std::string& num2){
 //    }
     std::string mult = karatsuba_algorithm_multiplication(n1, n2);
     int mult_len = mult.length();
-    std::string res =std::string( "0",std::max(pow_of_ten_2-mult_len,0)) + mult;
-    res.insert(mult_len-pow_of_ten_2, ".");
+    std::string res =std::string( std::max(pow_of_ten_2-mult_len,0),'0') + mult;
+    res.insert(res.length()-pow_of_ten_2, ".");
 
     if (res[0] == '.' )
-        res = std::string(1, '0')+".";
+        res = std::string(1, '0') +res;
 
 
     //res = res + std::string( "0",pow_of_ten_1+pow_of_ten_2-mult_len) + mult;
-   // res = res + std::string( "0",pow_of_ten_2-mult_len) + mult;
+    // res = res + std::string( "0",pow_of_ten_2-mult_len) + mult;
     return res;
 }
+
+std::string subtract_float(std::string num1, std::string num2){
+    int base1 = num1.length();
+    int base2 = num2.length();
+    int pow_of_ten_1 = base1 - 2;
+    int pow_of_ten_2 = base2 - 2;
+    std::string n1 = num1.substr(2,base1 +1 );
+
+    std::string n2 = num2.substr(2,base2 +1 );
+    n1 = n1 + std::string(std::max(0,pow_of_ten_2-pow_of_ten_1),'0');
+
+    int num_of_leading_zeros = n1.length() - (Big_num::remove_leading_zeros(n1)).length();
+
+    std::string subtr = subtract_big_num(n1, n2);
+    int subtr_len = subtr.length();
+    subtr = Big_num::remove_leading_zeros(subtr);
+    std::string res ="0." + std::string( std::max(num_of_leading_zeros,0),'0') + subtr;
+
+    return res;
+}
+
+std::string mult_two_float(const std::string& num1, const std::string& num2){
+
+    int base1 = num1.length();
+    int base2 = num2.length();
+    int pow_of_ten_1 = base1 - 2;
+    int pow_of_ten_2 = base2 - 2;
+    std::string n1 = num1.substr(2,base1 +1 );
+
+    std::string n2 = num2.substr(2,base2 +1 );
+
+    n1 = Big_num::remove_leading_zeros(n1);
+    n2 = Big_num::remove_leading_zeros(n2);
+
+    std::string mult = karatsuba_algorithm_multiplication(n1, n2);
+    int mult_len = mult.length();
+
+    std::string res =std::string( std::max(pow_of_ten_2+pow_of_ten_1-mult_len,0),'0') + mult;
+    res.insert(res.length()-pow_of_ten_2-pow_of_ten_1, ".");
+
+    if (res[0] == '.' )
+        res = std::string(1, '0')+res;
+
+    return res;
+}
+
+
+std::string inverse_1(const std::string& num){
+    int base = num.length();
+    unsigned long long approx_num = stoll(num.substr(0,std::min(19, base)));
+    long double x = 1.0/approx_num;
+
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2*base ) << x;
+    std::string x_str = stream.str();
+
+    return x_str;
+}
+
+
+std::string inverse(const std::string& num, int k){
+    std::string x = inverse_1(num);
+
+    for (int i = 0; i < k; ++i) {
+        std::string x_square = mult_two_float(x,x);
+        std::string coef1 = mult_float("2",x);
+        std::string coef2 = mult_float(num,x_square);
+        x = subtract_float(coef1, coef2);
+        x = x.substr(0, std::min(x.length(), (k+1)*2*num.length()));
+    }
+
+
+
+
+    return x;
+}
+
+
+
+
+
+
+
 
 std::string division(std::string num, std::string divisor){
     std::string divisor_inverse = inverse_1(divisor);
@@ -651,14 +689,113 @@ std::string division(std::string num, std::string divisor){
 }
 
 
+
+
+
+
+
+
+std::string inv(std::string a, std::string m)
+{
+    std::string m0 = m, t, q;
+    std::string x0 = "0", x1 = "1";
+    bool sign_x_0 = true;
+
+    if (m == "1")
+        return "0";
+
+    // Apply extended Euclid Algorithm
+    while (compare_nums(a,"1")) {
+        // q is quotient
+        int m_int = stoll(m);
+        //q = longDivision(a , m_int);
+        q = longDivision(subtract_big_num(a,remainder(a,m)),m_int);
+
+        t = m;
+
+        // m is remainder now, process same as
+        // euclid's algo
+        m = remainder(a,m), a = t;
+
+        t = x0;
+
+        std::string mult = karatsuba_algorithm_multiplication(q , x0);
+        if (sign_x_0)
+            if (compare_nums(x1, mult))
+                x0 = subtract_big_num(x1, mult);
+
+            else {
+                x0 = subtract_big_num(mult, x1);
+                sign_x_0 = false;
+            }
+        else
+            x0 = sum_big_num(x1, mult);
+
+        x1 = t;
+    }
+
+    // Make x1 positive
+//    if (x1 < 0)
+//        x1 += m0;
+
+    return x1;
+}
+
+// k is size of num[] and rem[]. Returns the smallest
+// number x such that:
+// x % num[0] = rem[0],
+// x % num[1] = rem[1],
+// ..................
+// x % num[k-2] = rem[k-1]
+// Assumption: Numbers in num[] are pairwise coprime
+// (gcd for every pair is 1)
+std::string findMinX(std::string num[], std::string rem[], int k)
+{
+    // Compute product of all numbers
+
+    auto ppp = [k, num] (int i) -> std::string {
+        std::string prod = "1";
+        for (int j = 0; j < k; j++) {
+            if (j != i)
+                prod = karatsuba_algorithm_multiplication(num[i], prod);
+        }
+        return prod;
+    };
+
+    // Initialize result
+    std::string result = "0";
+
+    // Apply above formula
+    for (int i = 0; i < k; i++) {
+
+
+        std::string pp = ppp(i);
+        result = sum_big_num(result, karatsuba_algorithm_multiplication(
+                             karatsuba_algorithm_multiplication(rem[i] ,inv(pp, num[i] ) )
+                                                                , pp));
+    }
+
+    return remainder(result , ppp(k+1));
+}
+
+
+
+
+
+
 std::string modular_mult(std::string num1, std::string num2){
-    std::string res = "";
-    std::string m1 = "9999";
-    std::string m2 = "999999";
-    std::string m3 = "9999999";
-    std::string m4 = "99999999";
-    std::string m5 = "9999999999";
-    std::string m6 = "999999999999";
+
+
+    std::string m1 = "8388607";//2^23-1
+    std::string m2 = "33554431";//25
+    std::string m3 = "67108863";//26
+    std::string m4 = "134217727";//27
+    std::string m5 = "536870911";//29
+    std::string m6 = "2147483647";//31
+
+    if ( (num1.length() < m6.length()/2) and (num1.length() < m6.length()/2) ){
+        return karatsuba_algorithm_multiplication(num1, num2);
+    }
 
 
     std::string u1 = remainder(num1, m1);
@@ -683,94 +820,89 @@ std::string modular_mult(std::string num1, std::string num2){
     std::string w5 = remainder(karatsuba_algorithm_multiplication(v5, u5), m5);
     std::string w6 = remainder(karatsuba_algorithm_multiplication(v6, u6), m6);
 
+    std::string moduli[] = {m1,m2,m3,m4,m5,m6};
+    std::string rem[] = {w1,w2,w3,w4,w5,w6};
+    std::string w = findMinX(moduli,rem,6 );
 //    w_1 = w1 mod m1
 //                    1       2  3      4   ... operations // M_j_k, k = 1...n
 // w_j = ( ... ( ( wj - w_1) C1j - w_2) C2j - · · · - w_j_1) C(j-1)j mod mj
-    std::string w_1 = remainder(w1, m1);
-    std::string w_2 = remainder(karatsuba_algorithm_multiplication(subtract_big_num(w2 , w_1), "1000000"), m2);
-    std::string w_3 = remainder(
-            karatsuba_algorithm_multiplication(
-                subtract_big_num(
-
-                karatsuba_algorithm_multiplication(
-                        subtract_big_num(w3, w_1), "10000000"
-                          ),
-
-                          w_2
-                        ),
-
-                    "19999999"
-            )
-            ,
-            m3
-            );
-    std::string c_1_4 = "100000000";
-    std::string c_2_4 = "199999999";
-    std::string c_3_4 = "299999998";
-    std::string M_4_1 = subtract_big_num(w4, w_1);
-    std::string M_4_2 = karatsuba_algorithm_multiplication(M_4_1, c_1_4);
-    std::string M_4_3 = subtract_big_num(M_4_2, w_2);
-    std::string M_4_4 = karatsuba_algorithm_multiplication(M_4_3, c_2_4);
-    std::string M_4_5 = subtract_big_num(M_4_4, w_3);
-    std::string M_4_6 = karatsuba_algorithm_multiplication(M_4_5, c_3_4);
-    std::string w_4 = remainder(M_4_6, m4);
-
-
-    std::string c_1_5 = "10000000000";
-    std::string c_2_5 = "19999999999";
-    std::string c_3_5 = "29999999998";
-    std::string c_4_5 = "39999999997";
-    std::string M_5_1 = subtract_big_num(w5, w_1);
-    std::string M_5_2 = karatsuba_algorithm_multiplication(M_5_1, c_1_5);
-    std::string M_5_3 = subtract_big_num(M_5_2, w_2);
-    std::string M_5_4 = karatsuba_algorithm_multiplication(M_5_3, c_2_5);
-    std::string M_5_5 = subtract_big_num(M_5_4, w_3);
-    std::string M_5_6 = karatsuba_algorithm_multiplication(M_5_5, c_3_5);
-    std::string M_5_7 = subtract_big_num(M_5_6, w_4);
-    std::string M_5_8 = karatsuba_algorithm_multiplication(M_5_7, c_4_5);
-    std::string w_5 = remainder(M_5_8, m5);
-
-
-    std::string c_1_6 = "1000000000000";
-    std::string c_2_6 = "1999999999999";
-    std::string c_3_6 = "2999999999998";
-    std::string c_4_6 = "3999999999997";
-    std::string c_5_6 = "4999999999996";
-    std::string M_6_1 = subtract_big_num(w6, w_1);
-    std::string M_6_2 = karatsuba_algorithm_multiplication(M_6_1, c_1_6);
-    std::string M_6_3 = subtract_big_num(M_6_2, w_2);
-    std::string M_6_4 = karatsuba_algorithm_multiplication(M_6_3, c_2_6);
-    std::string M_6_5 = subtract_big_num(M_6_4, w_3);
-    std::string M_6_6 = karatsuba_algorithm_multiplication(M_6_5, c_3_6);
-    std::string M_6_7 = subtract_big_num(M_6_6, w_4);
-    std::string M_6_8 = karatsuba_algorithm_multiplication(M_6_7, c_4_6);
-    std::string M_6_9 = subtract_big_num(M_6_8, w_5);
-    std::string M_6_10 = karatsuba_algorithm_multiplication(M_6_9, c_5_6);
-    std::string w_6 = remainder(M_6_10, m6);
-
-    //w = ( ... (w_r * m_r-1 + w_r-1 ) m_r-2 + · · · + w_2) m1 + w_1.
-    // w_6 * m5 + w4
-    std::string w = karatsuba_algorithm_multiplication(w_6, m5);
-    w = sum_big_num(w, w_5);
-    w = karatsuba_algorithm_multiplication(w, m4);
-    w = sum_big_num(w, w_4);
-    w = karatsuba_algorithm_multiplication(w, m3);
-    w = sum_big_num(w, w_3);
-    w = karatsuba_algorithm_multiplication(w, m2);
-    w = sum_big_num(w, w_2);
-    w = karatsuba_algorithm_multiplication(w, m1);
-    w = sum_big_num(w, w_1);
+//    std::string w_1 = remainder(w1, m1);
+//    std::string w_2 = remainder(karatsuba_algorithm_multiplication(subtract_big_num(w2 , w_1), "1000000"), m2);
+//    std::string w_3 = remainder(
+//            karatsuba_algorithm_multiplication(
+//                subtract_big_num(
+//
+//                karatsuba_algorithm_multiplication(
+//                        subtract_big_num(w3, w_1), "10000000"
+//                          ),
+//
+//                          w_2
+//                        ),
+//
+//                    "19999999"
+//            )
+//            ,
+//            m3
+//            );
+//    std::string c_1_4 = "100000000";
+//    std::string c_2_4 = "199999999";
+//    std::string c_3_4 = "299999998";
+//    std::string M_4_1 = subtract_big_num(w4, w_1);
+//    std::string M_4_2 = karatsuba_algorithm_multiplication(M_4_1, c_1_4);
+//    std::string M_4_3 = subtract_big_num(M_4_2, w_2);
+//    std::string M_4_4 = karatsuba_algorithm_multiplication(M_4_3, c_2_4);
+//    std::string M_4_5 = subtract_big_num(M_4_4, w_3);
+//    std::string M_4_6 = karatsuba_algorithm_multiplication(M_4_5, c_3_4);
+//    std::string w_4 = remainder(M_4_6, m4);
+//
+//
+//    std::string c_1_5 = "10000000000";
+//    std::string c_2_5 = "19999999999";
+//    std::string c_3_5 = "29999999998";
+//    std::string c_4_5 = "39999999997";
+//    std::string M_5_1 = subtract_big_num(w5, w_1);
+//    std::string M_5_2 = karatsuba_algorithm_multiplication(M_5_1, c_1_5);
+//    std::string M_5_3 = subtract_big_num(M_5_2, w_2);
+//    std::string M_5_4 = karatsuba_algorithm_multiplication(M_5_3, c_2_5);
+//    std::string M_5_5 = subtract_big_num(M_5_4, w_3);
+//    std::string M_5_6 = karatsuba_algorithm_multiplication(M_5_5, c_3_5);
+//    std::string M_5_7 = subtract_big_num(M_5_6, w_4);
+//    std::string M_5_8 = karatsuba_algorithm_multiplication(M_5_7, c_4_5);
+//    std::string w_5 = remainder(M_5_8, m5);
+//
+//
+//    std::string c_1_6 = "1000000000000";
+//    std::string c_2_6 = "1999999999999";
+//    std::string c_3_6 = "2999999999998";
+//    std::string c_4_6 = "3999999999997";
+//    std::string c_5_6 = "4999999999996";
+//    std::string M_6_1 = subtract_big_num(w6, w_1);
+//    std::string M_6_2 = karatsuba_algorithm_multiplication(M_6_1, c_1_6);
+//    std::string M_6_3 = subtract_big_num(M_6_2, w_2);
+//    std::string M_6_4 = karatsuba_algorithm_multiplication(M_6_3, c_2_6);
+//    std::string M_6_5 = subtract_big_num(M_6_4, w_3);
+//    std::string M_6_6 = karatsuba_algorithm_multiplication(M_6_5, c_3_6);
+//    std::string M_6_7 = subtract_big_num(M_6_6, w_4);
+//    std::string M_6_8 = karatsuba_algorithm_multiplication(M_6_7, c_4_6);
+//    std::string M_6_9 = subtract_big_num(M_6_8, w_5);
+//    std::string M_6_10 = karatsuba_algorithm_multiplication(M_6_9, c_5_6);
+//    std::string w_6 = remainder(M_6_10, m6);
+//
+//    //w = ( ... (w_r * m_r-1 + w_r-1 ) m_r-2 + · · · + w_2) m1 + w_1.
+//    // w_6 * m5 + w4
+//    std::string w = karatsuba_algorithm_multiplication(w_6, m5);
+//    w = sum_big_num(w, w_5);
+//    w = karatsuba_algorithm_multiplication(w, m4);
+//    w = sum_big_num(w, w_4);
+//    w = karatsuba_algorithm_multiplication(w, m3);
+//    w = sum_big_num(w, w_3);
+//    w = karatsuba_algorithm_multiplication(w, m2);
+//    w = sum_big_num(w, w_2);
+//    w = karatsuba_algorithm_multiplication(w, m1);
+//    w = sum_big_num(w, w_1);
     return w;
 
 
-
-
-
-
-
-
-
-    return res;
 }
 
 
