@@ -28,7 +28,7 @@ std::string power(std::string n, std::string a = "3", std::string p ="1")
             //p = sum_big_num(p, "1");
         }
         // n must be even now
-        p = longDivision(p, 2); // n = n/2
+        p = long_division(p, 2); // n = n/2
         a = remainder((karatsuba_algorithm_multiplication(a, a)), n);
     }
     return res;
@@ -59,18 +59,18 @@ bool is_prime_fermat_test(std::string n, int k) {
     }
 
     // Corner cases
-
+    int y = n.length();
     // Try k times
     while (k>0)
     {
         // Pick a random number in [2..n-2]
         // Above corner cases make sure that n > 4
-        std::string a = "7";
-
+        //std::string a = std::to_string( (rand() % (std::min(y, 10000) + 3)) + 3 );
+        std::string a = "5";
         // Checking if a and n are co-prime
         if (gcd(n, a) != "1")
             return false;
-
+        //a
         // Fermat's little theorem
         if (power(a, subtract_big_num(n, "1")) != "1")
             return false;
@@ -144,7 +144,7 @@ bool miller_rabin_primality_test(std::string n, int k)
     // Find r such that n = 2^d * r + 1 for some r >= 1
     std::string d = subtract_big_num(n, "1");
     while (d.back()%2 == 0)
-        d = longDivision(d, 2);
+        d = long_division(d, 2);
 
     // Iterate given number of 'k' times
     for (int i = 0; i < k; i++)
@@ -167,7 +167,7 @@ std::string modulo(std::string base, std::string exponent,
 
 
         y = remainder(karatsuba_algorithm_multiplication(y, y), mod);
-        exponent = longDivision(exponent , 2);
+        exponent = long_division(exponent, 2);
     }
 
     return remainder(x, mod);
@@ -197,7 +197,7 @@ int calculateJacobian(std::string a, std::string n)
 
         while ( (a.back()-'0') % 2 == 0 )
         {
-            a = longDivision(a,2);
+            a = long_division(a, 2);
             if (remainder(n, "8") == "3" || remainder(n, "8") == "5")
                 ans = -ans;
 
@@ -248,7 +248,7 @@ bool solovay_strassen(std::string p, int iterations)
                 remainder(s, p);
         std::string mod =
                 modulo(a,
-        longDivision(subtract_big_num(p ,"1") , 2),
+                       long_division(subtract_big_num(p, "1"), 2),
                        p);
 
         if (jacobian=="0" || mod != jacobian)

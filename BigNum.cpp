@@ -682,7 +682,7 @@ std::string inv(std::string a, std::string m)
     while (compare_nums(a,"1")) {
         // q is quotient
         int m_int = stoll(m);
-        //q = longDivision(a , m_int);
+        //q = long_division(a , m_int);
         q = long_division(subtract_big_num(a,remainder(a,m)),m_int);
 
         t = m;

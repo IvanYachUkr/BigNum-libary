@@ -61,7 +61,7 @@ public:
 std::string convert_decimal_to_binary(std::string num_decimal);
 std::string convert_binary_to_decimal(std::string num_decimal);
 std::string modular_mult(std::string num1, std::string num2);
-std::string longDivision(std::string number, int divisor);
+std::string long_division(std::string number, int divisor);
 std::string remainder(std::string number, std::string modulo);
 std::string division(std::string num, std::string divisor);
 std::string sum_big_num(std::string first_number,std::string second_number);
