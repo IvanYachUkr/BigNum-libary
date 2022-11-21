@@ -88,7 +88,7 @@ bool is_prime_fermat_test(std::string n, int k) {
 
 
 
-bool miillerTest(std::string d, std::string n)
+bool miller_rabin_test(std::string d, std::string n)
 {
 
     // Pick a random number in [2..n-2]
@@ -129,10 +129,8 @@ bool miillerTest(std::string d, std::string n)
     return false;
 }
 
-// It returns false if n is composite and returns true if n
-// is probably prime.  k is an input parameter that determines
-// accuracy level. Higher value of k indicates more accuracy.
-bool isPrime_Miller(std::string n, int k)
+
+bool miller_rabin_primality_test(std::string n, int k)
 {
     // Corner cases
     int n_int = n.back() - '0';
@@ -153,7 +151,7 @@ bool isPrime_Miller(std::string n, int k)
 
     // Iterate given number of 'k' times
     for (int i = 0; i < k; i++)
-        if (!miillerTest(d, n))
+        if (!miller_rabin_test(d, n))
             return false;
 
     return true;
@@ -182,22 +180,22 @@ std::string modulo(std::string base, std::string exponent,
 int calculateJacobian(std::string a, std::string n)
 {
     if (a == "0")
-        return 0;// (0/n) = 0
+        return 0;
 
     int ans = 1;
     bool minus_a = false;
 
     if (a == "1")
-        return ans;// (1/n) = 1
+        return ans;
 
     while (a != "0")
     {
 
         if (minus_a)
         {
-            minus_a = !minus_a;// (a/n) = (-a/n)*(-1/n)
+            minus_a = !minus_a;
             if ( remainder(n , "4") == "3" )
-                ans = -ans;// (-1/n) = -1 if n = 3 (mod 4);
+                ans = -ans;
         }
 
         while ( (a.back()-'0') % 2 == 0 )
@@ -230,8 +228,8 @@ int calculateJacobian(std::string a, std::string n)
     return 0;
 }
 
-// To perform the Solovay-Strassen Primality Test
-bool solovoyStrassen(std::string p, int iterations)
+
+bool solovay_strassen(std::string p, int iterations)
 {
     if (!compare_nums(p,"2"))
         return false;
@@ -240,7 +238,6 @@ bool solovoyStrassen(std::string p, int iterations)
 
     for (int i = 0; i < iterations; i++)
     {
-        // Generate a random number a
         int y = p.length();
         std::string a = std::to_string( (rand() % (std::min(y, 10000) + 3)) + 3 );
         int cj = calculateJacobian(a, p);
@@ -265,7 +262,7 @@ bool solovoyStrassen(std::string p, int iterations)
 
 }
 
-bool isPrimeAKS(unsigned long long int n)
+bool AKS_primality_test(unsigned long long int n)
 {
     std::vector<unsigned long long int> c;
 
@@ -293,7 +290,7 @@ bool isPrimeAKS(unsigned long long int n)
 
     return i == 0;
 }
-//bool isPrimeAKS(unsigned long long int n)
+//bool AKS_primality_test(unsigned long long int n)
 //{
 //    std::vector<std::string> c;
 //
@@ -323,5 +320,3 @@ bool isPrimeAKS(unsigned long long int n)
 //    return i == 0;
 //}
 
-
-// driver program

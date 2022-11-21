@@ -71,25 +71,22 @@ std::string longDivision(std::string number, int divisor)
     if (number == "1"){
         return "0";
     }
-    // As result can be very large store it in string
+
     std::string ans;
 
-    // Find prefix of number that is larger
-    // than divisor.
-    int idx = 0;
-    int temp = number[idx] - '0';
-    while (temp < divisor)
-        temp = temp * 10 + (number[++idx] - '0');
 
-    // Repeatedly divide divisor with temp. After
-    // every division, update temp to include one
-    // more digit.
-    while (number.size() > idx) {
-        // Store result in answer i.e. temp / divisor
+    int index = 0;
+    int temp = number[index] - '0';
+    while (temp < divisor)
+        temp = temp * 10 + (number[++index] - '0');
+
+
+    while (number.size() > index) {
+
         ans += (temp / divisor) + '0';
 
         // Take next digit of number
-        temp = (temp % divisor) * 10 + number[++idx] - '0';
+        temp = (temp % divisor) * 10 + number[++index] - '0';
     }
 
     // If divisor is greater than number
@@ -148,7 +145,8 @@ std::string subtract_big_num(std::string first_number, std::string second_number
     std::string res;
 
 
-    int len_first_num = first_number.length(), len_second_num = second_number.length();
+    int len_first_num = first_number.length();
+    int len_second_num = second_number.length();
 
 
     reverse(second_number.begin(), second_number.end());
@@ -234,7 +232,7 @@ std::string convert_binary_to_decimal(std::string num_binary) {
 
 
 std::string Big_num::remove_leading_zeros(const std::string& num) {
-    // Use regular expression to remove leading 0s
+    //(?!$) is a negative lookahead. It will look for any match of abc that is not directly followed by a $ (end of line)
     const std::regex pattern("^0+(?!$)");
 
     // Replaces the matched value
@@ -380,17 +378,9 @@ std::string Big_num::toom_cook_method_multiplication(std::string first_num, std:
     C2 = subtract_big_num(C2, C3);
     C3 = subtract_big_num(C3, C4);
 
-    // Adding
-//    C4 = C4 + std::string(4 * one_third_numbers_len , '0');
-//    C3 = C3 + std::string(3 * one_third_numbers_len , '0');
-//    C2 = C2 + std::string(2 * one_third_numbers_len , '0');
-//    C1 = C1 + std::string(1 * one_third_numbers_len , '0');
-//    C0 = C0;
-    std::string res = "";
-//    res = sum_big_num(C4, C3);
-//    res = sum_big_num(res, C2);
-//    res = sum_big_num(res, C1);
-//    res = sum_big_num(res, C0);
+
+    std::string res;
+
     res = karatsuba_algorithm_multiplication("65536", C4);
     res = sum_big_num(res, karatsuba_algorithm_multiplication("4096", C3));
     res = sum_big_num(res, karatsuba_algorithm_multiplication("256", C2));
@@ -420,20 +410,15 @@ std::string karatsuba_algorithm_multiplication(std::string first_n, std::string 
     if (first_num.length() > second_num.length())
         swap(first_num, second_num);
 
-    // Make both numbers to have
-    // same digits
+
     int len_first_num = first_num.length();
     int len_second_num = second_num.length();
 
     first_num = std::string(len_second_num - len_first_num, '0') + first_num;
     len_first_num += len_second_num - len_first_num;
-//    while (len_second_num > len_first_num) {
-//        //first_num += "0";
-//        first_num = "0" + first_num;
-//        len_first_num++;
-//    }
 
-    // Base case
+
+
     if (len_first_num == 1) {
 
         int ans = stoi(first_num) * stoi(second_num);
@@ -441,35 +426,34 @@ std::string karatsuba_algorithm_multiplication(std::string first_n, std::string 
         return ans_str;
     }
 
-    // Add zeros in the beginning of
-    // the strings when length is odd
+
     if (len_first_num % 2 == 1) {
         len_first_num++;
         first_num = "0" + first_num;
         second_num = "0" + second_num;
     }
 
-    std::string Al, Ar, Bl, Br;
+    std::string A_left_most, A_right_most, B_left_most, B_right_most;
 
-    // Find the values of Al, Ar,
-    // Bl, and Br.
+    // Find the values of A_left_most, A_right_most,
+    // B_left_most, and B_right_most.
     for (int i = 0; i < len_first_num / 2; ++i) {
-        Al += first_num[i];
-        Bl += second_num[i];
-        Ar += first_num[len_first_num / 2 + i];
-        Br += second_num[len_first_num / 2 + i];
+        A_left_most += first_num[i];
+        B_left_most += second_num[i];
+        A_right_most += first_num[len_first_num / 2 + i];
+        B_right_most += second_num[len_first_num / 2 + i];
     }
 
-    // Stores the value of Al * Bl
-    std::string Al_multiply_Bl = karatsuba_algorithm_multiplication(Al, Bl);
+    // Stores the value of A_left_most * B_left_most
+    std::string Al_multiply_Bl = karatsuba_algorithm_multiplication(A_left_most, B_left_most);
 
-    // Stores the value of Ar * Br
-    std::string Ar_multiply_Br = karatsuba_algorithm_multiplication(Ar, Br);
+    // Stores the value of A_right_most * B_right_most
+    std::string Ar_multiply_Br = karatsuba_algorithm_multiplication(A_right_most, B_right_most);
 
-    // Stores value of ((Al + Ar)*(Bl + Br) - Al*Bl - Ar*Br)
+    // Stores value of ((A_left_most + A_right_most)*(B_left_most + B_right_most) - A_left_most*B_left_most - A_right_most*B_right_most)
     std::string A_multiply_B_with_leading_zeros = subtract_big_num(
-            karatsuba_algorithm_multiplication(sum_big_num(Al, Ar),
-                     sum_big_num(Bl, Br)),
+            karatsuba_algorithm_multiplication(sum_big_num(A_left_most, A_right_most),
+                     sum_big_num(B_left_most, B_right_most)),
             sum_big_num(Al_multiply_Bl, Ar_multiply_Br));
 
     // Multiply Al_multiply_Bl by 10^n
@@ -492,10 +476,6 @@ std::string karatsuba_algorithm_multiplication(std::string first_n, std::string 
 
 }
 
-Big_num Big_num::operator%(const Big_num &second_term) const {
-
-    return Big_num();
-}
 std::string remainder(std::string number, std::string modulo){
     //number%modulo
     int a = number.length() - modulo.length();
@@ -516,6 +496,11 @@ std::string remainder(std::string number, std::string modulo){
     return number;
 }
 
+Big_num Big_num::operator%(const Big_num &second_term) const {
+    Big_num n;
+    n.num_decimal = remainder(num_decimal, second_term.num_decimal);
+    return Big_num();
+}
 
 
 
@@ -525,13 +510,17 @@ std::string remainder(std::string number, std::string modulo){
 
 
 
-std::string schonhageStrassenMultiplication(std::string x, std::string y)
+
+
+std::string Schonhage_Strassen_Multiplication_method(std::string x, std::string y)
 {
+    //sources https://en.wikipedia.org/wiki/Schönhage–Strassen_algorithm#Convolutions
+    // https://www.geeksforgeeks.org/java-program-to-implement-the-schonhage-strassen-algorithm-for-multiplication-of-two-numbers/#:~:text=So%2C%20Schonhage-Strassen%27s%20algorithm%20is,Acyclic%20Convolution%20or%20Linear%20Convolution.
     int n = x.length();
     int m = y.length();
-    int linearConvolution[n + m - 1];
+    int linear_convolution[n + m - 1];
     for (int i = 0; i < (n + m - 1); i++)
-        linearConvolution[i] = 0;
+        linear_convolution[i] = 0;
 
     std::string p = x;
     for (int i = 0; i < m; i++)
@@ -539,7 +528,7 @@ std::string schonhageStrassenMultiplication(std::string x, std::string y)
         x = p;
         for (int j = 0; j < n; j++)
         {
-            linearConvolution[i + j] += (y.back()-'0') * (x.back()-'0');
+            linear_convolution[i + j] += (y.back() - '0') * (x.back() - '0');
             x = std::string(x, 0, x.length() - 1);
         }
         y = std::string(y, 0, y.length() - 1);
@@ -551,10 +540,10 @@ std::string schonhageStrassenMultiplication(std::string x, std::string y)
     int b = 0;
     for (int i = 0; i < n + m - 1; i++)
     {
-        linearConvolution[i] += nextCarry;
-        //product = sum_big_num(product , std::to_string(base * (linearConvolution[i] % 10) ) );
-        product = sum_big_num(product , std::to_string((linearConvolution[i] % 10) ) + std::string(b,'0'));
-        nextCarry = linearConvolution[i] / 10;
+        linear_convolution[i] += nextCarry;
+        //product = sum_big_num(product , std::to_string(base * (linear_convolution[i] % 10) ) );
+        product = sum_big_num(product , std::to_string((linear_convolution[i] % 10) ) + std::string(b, '0'));
+        nextCarry = linear_convolution[i] / 10;
         //base = karatsuba_algorithm_multiplication(base, "10");
         b++;
     }
@@ -571,21 +560,11 @@ std::string mult_float(const std::string& num1, const std::string& num2){
     int base2 = num2.length();
     //int pow_of_ten_1 = base1 - 2;
     int pow_of_ten_2 = base2 - 2;
-    //std::string n1 = num1.substr(2,base1 +1 );
+
     std::string n1 = num1;
     std::string n2 = num2.substr(2,base2 +1 );
     n2 = Big_num::remove_leading_zeros(n2);
-    //pow_of_ten_2 = pow_of_ten_2 - ()
 
-
-//    if (num1.find(',') == std::string::npos){
-//        n1 = num1;
-//        pow_of_ten_1 = 0;
-    //}
-//    if (num1.find(',') == std::string::npos){
-//        n2 = num2;
-//        pow_of_ten_2 = 0;
-//    }
     std::string mult = karatsuba_algorithm_multiplication(n1, n2);
     int mult_len = mult.length();
     std::string res =std::string( std::max(pow_of_ten_2-mult_len,0),'0') + mult;
@@ -595,8 +574,7 @@ std::string mult_float(const std::string& num1, const std::string& num2){
         res = std::string(1, '0') +res;
 
 
-    //res = res + std::string( "0",pow_of_ten_1+pow_of_ten_2-mult_len) + mult;
-    // res = res + std::string( "0",pow_of_ten_2-mult_len) + mult;
+
     return res;
 }
 
@@ -741,15 +719,8 @@ std::string inv(std::string a, std::string m)
     return x1;
 }
 
-// k is size of num[] and rem[]. Returns the smallest
-// number x such that:
-// x % num[0] = rem[0],
-// x % num[1] = rem[1],
-// ..................
-// x % num[k-2] = rem[k-1]
-// Assumption: Numbers in num[] are pairwise coprime
-// (gcd for every pair is 1)
-std::string findMinX(std::string num[], std::string rem[], int k)
+
+std::string solve_chinese_remainder_th(std::string num[], std::string rem[], int k)
 {
     // Compute product of all numbers
 
@@ -822,7 +793,7 @@ std::string modular_mult(std::string num1, std::string num2){
 
     std::string moduli[] = {m1,m2,m3,m4,m5,m6};
     std::string rem[] = {w1,w2,w3,w4,w5,w6};
-    std::string w = findMinX(moduli,rem,6 );
+    std::string w = solve_chinese_remainder_th(moduli, rem, 6);
 //    w_1 = w1 mod m1
 //                    1       2  3      4   ... operations // M_j_k, k = 1...n
 // w_j = ( ... ( ( wj - w_1) C1j - w_2) C2j - · · · - w_j_1) C(j-1)j mod mj

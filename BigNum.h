@@ -35,7 +35,7 @@ public:
     Big_num operator - (Big_num const &second_term) const;
     //Big_num operator << (Big_num const &second_term) const;
     Big_num operator % (Big_num const &second_term) const;
-
+    friend std::ostream& operator<<(std::ostream& os, const Big_num& bn);
     //std::basic_string<char> karatsuba_algorithm_multiplication(Big_num first_num, Big_num second_num) override;
 
 
@@ -53,6 +53,11 @@ public:
 
 
 };
+//std::ostream& operator<<(std::ostream& os, const Big_num& bn)
+//{
+//    os << bn.num_decimal;
+//    return os;
+//}
 std::string convert_decimal_to_binary(std::string num_decimal);
 std::string convert_binary_to_decimal(std::string num_decimal);
 std::string modular_mult(std::string num1, std::string num2);
@@ -62,7 +67,7 @@ std::string division(std::string num, std::string divisor);
 std::string sum_big_num(std::string first_number,std::string second_number);
 std::string subtract_big_num(std::string first_number,std::string second_number);
 std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num, std::string second_num);
-std::string schonhageStrassenMultiplication(std::string x, std::string y);
+std::string Schonhage_Strassen_Multiplication_method(std::string x, std::string y);
 bool compare_nums(std::string n1, std::string n2);
 std::string inverse(const std::string& num, int k);
 
