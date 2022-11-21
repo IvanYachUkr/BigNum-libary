@@ -63,7 +63,7 @@ bool compare_nums(std::string n1, std::string n2){
 
 
 //+ - Operations
-std::string longDivision(std::string number, int divisor)
+std::string long_division(std::string number, int divisor)
 {
     if ((number.back() - '0')%2 == 1 and divisor == 2){
         number= subtract_big_num(number, "1");
@@ -208,7 +208,7 @@ std::string convert_decimal_to_binary(std::string num_decimal) {
     while (num_decimal > "0"){
         std::string rem = remainder(num_decimal, "2");
         num_binary =  rem + num_binary;
-        num_decimal = longDivision(
+        num_decimal = long_division(
                 num_decimal.substr(0, num_decimal.length()-1)+
                         std::to_string(num_decimal.back() - rem[0]),
                 2);
@@ -347,24 +347,24 @@ std::string Big_num::toom_cook_method_multiplication(std::string first_num, std:
     std::string C1 = W1_sub_W0;
 
 
-    std::string C2 = longDivision(
+    std::string C2 = long_division(
             subtract_big_num(W2_sub_W1 , C1),
                                   2);
 
-    std::string middle_term =  longDivision(
+    std::string middle_term =  long_division(
             subtract_big_num(W3_sub_W2, W2_sub_W1),
             2);
-    std::string C3 = longDivision(
+    std::string C3 = long_division(
             subtract_big_num(middle_term,C2),
             3) ;
 
     std::string C4 =
-            longDivision(
+            long_division(
             subtract_big_num(
 
-                    longDivision(
+                    long_division(
                             subtract_big_num(
-                            longDivision( subtract_big_num(W4_sub_W3, W3_sub_W2), 2),
+                            long_division( subtract_big_num(W4_sub_W3, W3_sub_W2), 2),
                         middle_term),
                         3),
 
@@ -444,33 +444,29 @@ std::string karatsuba_algorithm_multiplication(std::string first_n, std::string 
         B_right_most += second_num[len_first_num / 2 + i];
     }
 
-    // Stores the value of A_left_most * B_left_most
+    //A_left_most * B_left_most
     std::string Al_multiply_Bl = karatsuba_algorithm_multiplication(A_left_most, B_left_most);
 
-    // Stores the value of A_right_most * B_right_most
+    //A_right_most * B_right_most
     std::string Ar_multiply_Br = karatsuba_algorithm_multiplication(A_right_most, B_right_most);
 
-    // Stores value of ((A_left_most + A_right_most)*(B_left_most + B_right_most) - A_left_most*B_left_most - A_right_most*B_right_most)
+    // ((A_left_most + A_right_most)*(B_left_most + B_right_most) - A_left_most*B_left_most - A_right_most*B_right_most)
     std::string A_multiply_B_with_leading_zeros = subtract_big_num(
             karatsuba_algorithm_multiplication(sum_big_num(A_left_most, A_right_most),
                      sum_big_num(B_left_most, B_right_most)),
             sum_big_num(Al_multiply_Bl, Ar_multiply_Br));
 
-    // Multiply Al_multiply_Bl by 10^n
     for (int i = 0; i < len_first_num; ++i)
         Al_multiply_Bl +="0";
 
-    // Multiply s by 10^(n/2)
     for (int i = 0; i < len_first_num / 2; ++i)
         A_multiply_B_with_leading_zeros = A_multiply_B_with_leading_zeros + "0";
 
-    // Calculate final answer Al_multiply_Bl + A_multiply_B_with_leading_zeros + s
+    //Al_multiply_Bl + A_multiply_B_with_leading_zeros + s
     std::string ans = sum_big_num(Al_multiply_Bl, sum_big_num(Ar_multiply_Br, A_multiply_B_with_leading_zeros));
-
-    // Remove leading zeroes from ans
+    
     ans = Big_num::remove_leading_zeros(ans);
-
-    // Return Answer
+    
     return ans;
 
 
@@ -687,7 +683,7 @@ std::string inv(std::string a, std::string m)
         // q is quotient
         int m_int = stoll(m);
         //q = longDivision(a , m_int);
-        q = longDivision(subtract_big_num(a,remainder(a,m)),m_int);
+        q = long_division(subtract_big_num(a,remainder(a,m)),m_int);
 
         t = m;
 

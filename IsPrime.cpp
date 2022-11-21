@@ -45,10 +45,7 @@ std::string gcd(std::string a, std::string b)
     else return gcd(b, remainder(a, b));
 }
 
-// If n is prime, then always returns true, If n is
-// composite than returns false with high probability
-// Higher value of k increases probability of correct
-// result.
+
 bool is_prime_fermat_test(std::string n, int k) {
     int n_int = n.back() - '0';
 
