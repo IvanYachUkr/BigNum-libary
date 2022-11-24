@@ -53,11 +53,7 @@ public:
 
 
 };
-//std::ostream& operator<<(std::ostream& os, const Big_num& bn)
-//{
-//    os << bn.num_decimal;
-//    return os;
-//}
+
 std::string convert_decimal_to_binary(std::string num_decimal);
 std::string convert_binary_to_decimal(std::string num_decimal);
 std::string modular_mult(std::string num1, std::string num2);
@@ -70,5 +66,6 @@ std::basic_string<char> karatsuba_algorithm_multiplication(std::string first_num
 std::string Schonhage_Strassen_Multiplication_method(std::string x, std::string y);
 bool compare_nums(std::string n1, std::string n2);
 std::string inverse(const std::string& num, int k);
+
 
 #endif //LAB2_BIGNUM_H

@@ -12,5 +12,5 @@ bool is_prime_fermat_test(std::string n, int k);
 bool AKS_test(std::string num);
 bool solovay_strassen(std::string p, int iterations);
 bool AKS_primality_test(unsigned long long int n);
-
+bool AKS_primality_test(std::string n);
 #endif //LAB2_ISPRIME_H

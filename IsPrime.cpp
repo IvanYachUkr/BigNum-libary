@@ -10,7 +10,7 @@ std::string power(std::string n, std::string a = "3", std::string p ="1")
 {
     if (p == "1") {
         p = subtract_big_num(n, "1");
-        //p = n.substr(0, n.length() - 2) + std::to_string((n.back() - '1'));
+
     }
     std::string res = "1";
 
@@ -25,17 +25,16 @@ std::string power(std::string n, std::string a = "3", std::string p ="1")
             if (compare_nums(res, n)) {
                 res = remainder(res, n);
             }
-            //p = sum_big_num(p, "1");
+
         }
-        // n must be even now
-        p = long_division(p, 2); // n = n/2
+
+        p = long_division(p, 2);
         a = remainder((karatsuba_algorithm_multiplication(a, a)), n);
     }
     return res;
 }
 
 
-/*Recursive function to calculate gcd of 2 numbers*/
 std::string gcd(std::string a, std::string b)
 {
     if(compare_nums(b,a))
@@ -58,21 +57,19 @@ bool is_prime_fermat_test(std::string n, int k) {
         return false;
     }
 
-    // Corner cases
+
     int y = n.length();
-    // Try k times
+
     while (k>0)
     {
-        // Pick a random number in [2..n-2]
-        // Above corner cases make sure that n > 4
-        //std::string a = std::to_string( (rand() % (std::min(y, 10000) + 3)) + 3 );
-        std::string a = "5";
-        // Checking if a and n are co-prime
+
+        std::string a = std::to_string( (rand() % (std::min(y, 10000) + 3)) + 3 );
+
         if (gcd(n, a) != "1")
             return false;
-        //a
-        // Fermat's little theorem
-        if (power(a, subtract_big_num(n, "1")) != "1")
+
+
+        if (power(n,a) != "1")
             return false;
 
         k--;
@@ -88,8 +85,7 @@ bool is_prime_fermat_test(std::string n, int k) {
 bool miller_rabin_test(std::string d, std::string n)
 {
 
-    // Pick a random number in [2..n-2]
-    // Corner cases make sure that n > 4
+
     int n_int = n.back() - '0';
 
     if (n.length() <= 1) {
@@ -102,7 +98,7 @@ bool miller_rabin_test(std::string d, std::string n)
     }
 
     std::string a = "7";
-    // Compute a^d % n
+
     std::string x = power(n,a,d);
     std::string n_minus_one = subtract_big_num(n, "1");
     if (x == "1"  || x == n_minus_one)
@@ -122,14 +118,13 @@ bool miller_rabin_test(std::string d, std::string n)
         if (x == n_minus_one)    return true;
     }
 
-    // Return composite
     return false;
 }
 
 
 bool miller_rabin_primality_test(std::string n, int k)
 {
-    // Corner cases
+
     int n_int = n.back() - '0';
 
     if (n.length() <= 1) {
@@ -146,7 +141,6 @@ bool miller_rabin_primality_test(std::string n, int k)
     while (d.back()%2 == 0)
         d = long_division(d, 2);
 
-    // Iterate given number of 'k' times
     for (int i = 0; i < k; i++)
         if (!miller_rabin_test(d, n))
             return false;
@@ -173,7 +167,7 @@ std::string modulo(std::string base, std::string exponent,
     return remainder(x, mod);
 }
 
-// To calculate Jacobian symbol of a given number
+
 int calculateJacobian(std::string a, std::string n)
 {
     if (a == "0")
@@ -287,33 +281,23 @@ bool AKS_primality_test(unsigned long long int n)
 
     return i == 0;
 }
-//bool AKS_primality_test(unsigned long long int n)
-//{
-//    std::vector<std::string> c;
-//
-//    auto coef = [n,&c]()
-//    {
-//        int line = n+1;
-//        for (unsigned long long  i = 0; i < line/2; i++)
-//            c.emplace_back("1");
-//
-//        std::string C="1";
-//        c[0] = C;
-//        for (unsigned long long i = 1; i <= line/2-1; i++)
-//        {
-//            C = karatsuba_algorithm_multiplication(C , std::to_string((line - i) / i));
-//            c[i] = C;
-//
-//
-//        }
-//    };
-//    coef();
-//
-//    int i = n/2;
-//    std::string n_str = std::to_string(n);
-//    while (i-- && remainder(c[i] , n_str) == "0")
-//        ;
-//
-//    return i == 0;
-//}
+
+bool AKS_primality_test(std::string n) {
+    std::string i = "2";
+    std::string upper_bound_i = long_division(subtract_big_num(n, "1"), 2);
+    std::string line = sum_big_num(n, "1");
+    std::string C = n;
+    while (compare_nums(upper_bound_i,i) && (remainder(C, n) == "0")) {
+        C = long_division(
+            (karatsuba_algorithm_multiplication(C, subtract_big_num(line, i))),
+            stoll(i));
+        i = sum_big_num(i, "1");
+
+        if (remainder(C, n) != "0")
+            return false;
+
+    }
+    return true;
+}
+
 
