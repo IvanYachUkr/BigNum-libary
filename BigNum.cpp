@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <regex>
 #include <iomanip>
+#include <utility>
 #include "BigNum.h"
 
 
@@ -54,9 +55,9 @@ Big_num Big_num::operator%(const Big_num &second_term) const {
 
 
 
+// Operators
 
-
-bool compare_nums(std::string n1, std::string n2){
+bool compare_nums(const std::string& n1, const std::string& n2){
     int len1 = n1.length();
     int len2 = n2.length();
     if (len1 == len2){
@@ -68,7 +69,6 @@ bool compare_nums(std::string n1, std::string n2){
 }
 
 
-//+ - Operations
 std::string long_division(std::string number, int divisor)
 {
     if ((number.back() - '0')%2 == 1 and divisor == 2){
@@ -103,6 +103,25 @@ std::string long_division(std::string number, int divisor)
     return ans;
 }
 
+std::string remainder(std::string number, const std::string& modulo){
+    //number%modulo
+    int a = number.length() - modulo.length();
+    std::string m = std::string(std::max(0,a), '0') + modulo;
+    if (number == modulo){
+        return "0";
+    } else if (compare_nums(number, modulo)) { //number.compare(modulo)
+        while ( (number.length() > modulo.length()) or (!compare_nums( modulo, number)) ) {
+            std::string n1_copy;
+            std::string n2_copy = modulo;
+
+            n2_copy += std::string(number.length() - modulo.length() - (number.length() != modulo.length()), '0');
+            n1_copy = subtract_big_num(number, n2_copy);
+            number = n1_copy;
+        }
+
+    }
+    return number;
+}
 
 
 
@@ -197,7 +216,7 @@ std::string subtract_big_num(std::string first_number, std::string second_number
     }
     return res;
 }
-// End of +- operation
+// End of operators
 
 
 
@@ -209,8 +228,9 @@ std::string subtract_big_num(std::string first_number, std::string second_number
 
 
 // support functions
+
 std::string convert_decimal_to_binary(std::string num_decimal) {
-    std::string num_binary = "";
+    std::string num_binary;
     while (num_decimal > "0"){
         std::string rem = remainder(num_decimal, "2");
         num_binary =  rem + num_binary;
@@ -223,7 +243,7 @@ std::string convert_decimal_to_binary(std::string num_decimal) {
 }
 
 std::string convert_binary_to_decimal(std::string num_binary) {
-    std::string num_decimal = "";
+    std::string num_decimal;
     int len_binary = num_binary.length();
     reverse(num_binary.begin(), num_binary.end());
     std::string two_to_power = "1";
@@ -254,13 +274,11 @@ std::string Big_num::remove_leading_zeros(const std::string& num) {
 
 
 
-
+//Multiplication methods
 
 std::string Big_num::toom_cook_method_multiplication(std::string first_num, std::string second_num) {
 
     Big_num n;
-    std::string f_n = first_num;
-    std::string s_n = second_num;
 
     first_num = convert_decimal_to_binary(first_num);
     second_num = convert_decimal_to_binary(second_num);
@@ -395,19 +413,10 @@ std::string Big_num::toom_cook_method_multiplication(std::string first_num, std:
 }
 
 
-int Big_num::shenhage_method_multiplication(std::string first_num, std::string second_num) {
-    return 0;
-}
-
-int Big_num::shtrassen_shenhage_method_multiplication(std::string first_num, std::string second_num) {
-    return 0;
-}
-
-//std::basic_string<char> karatsuba_algorithm_multiplication(Big_num first_n, Big_num second_n) {
 std::string karatsuba_algorithm_multiplication(std::string first_n, std::string second_n) {
 
-    std::string first_num =  first_n;
-    std::string second_num = second_n;
+    std::string first_num =  std::move(first_n);
+    std::string second_num = std::move(second_n);
 
     if (first_num.length() > second_num.length())
         swap(first_num, second_num);
@@ -474,25 +483,6 @@ std::string karatsuba_algorithm_multiplication(std::string first_n, std::string 
 
 }
 
-std::string remainder(std::string number, std::string modulo){
-    //number%modulo
-    int a = number.length() - modulo.length();
-    std::string m = std::string(std::max(0,a), '0') + modulo;
-    if (number == modulo){
-        return "0";
-    } else if (compare_nums(number, modulo)) { //number.compare(modulo)
-        while ( (number.length() > modulo.length()) or (!compare_nums( modulo, number)) ) {
-            std::string n1_copy = number;
-            std::string n2_copy = modulo;
-
-            n2_copy = n2_copy + std::string(number.length() - modulo.length() - (number.length() != modulo.length()), '0');
-            n1_copy = subtract_big_num(number, n2_copy);
-            number = n1_copy;
-        }
-
-    }
-    return number;
-}
 
 
 
@@ -546,13 +536,16 @@ std::string Schonhage_Strassen_Multiplication_method(std::string x, std::string 
 }
 
 
+
+//Operators for float numbers
+
 std::string mult_float(const std::string& num1, const std::string& num2){
     if (num2 == "1"){
         return num1;
     }
-    int base1 = num1.length();
+
     int base2 = num2.length();
-    //int pow_of_ten_1 = base1 - 2;
+
     int pow_of_ten_2 = base2 - 2;
 
     std::string n1 = num1;
@@ -572,7 +565,7 @@ std::string mult_float(const std::string& num1, const std::string& num2){
     return res;
 }
 
-std::string subtract_float(std::string num1, std::string num2){
+std::string subtract_float(const std::string& num1, const std::string& num2){
     int base1 = num1.length();
     int base2 = num2.length();
     int pow_of_ten_1 = base1 - 2;
@@ -585,7 +578,7 @@ std::string subtract_float(std::string num1, std::string num2){
     int num_of_leading_zeros = n1.length() - (Big_num::remove_leading_zeros(n1)).length();
 
     std::string subtr = subtract_big_num(n1, n2);
-    int subtr_len = subtr.length();
+
     subtr = Big_num::remove_leading_zeros(subtr);
     std::string res ="0." + std::string( std::max(num_of_leading_zeros,0),'0') + subtr;
 
@@ -618,7 +611,7 @@ std::string mult_two_float(const std::string& num1, const std::string& num2){
 }
 
 
-std::string inverse_1(const std::string& num){
+std::string fixed_precision_inverse(const std::string& num){
     int base = num.length();
     unsigned long long approx_num = stoll(num.substr(0,std::min(19, base)));
     long double x = 1.0/approx_num;
@@ -632,7 +625,7 @@ std::string inverse_1(const std::string& num){
 
 
 std::string inverse(const std::string& num, int k){
-    std::string x = inverse_1(num);
+    std::string x = fixed_precision_inverse(num);
 
     for (int i = 0; i < k; ++i) {
         std::string x_square = mult_two_float(x,x);
@@ -641,9 +634,6 @@ std::string inverse(const std::string& num, int k){
         x = subtract_float(coef1, coef2);
         x = x.substr(0, std::min(x.length(), (k+1)*2*num.length()));
     }
-
-
-
 
     return x;
 }
@@ -655,8 +645,8 @@ std::string inverse(const std::string& num, int k){
 
 
 
-std::string division(std::string num, std::string divisor){
-    std::string divisor_inverse = inverse_1(divisor);
+std::string division(const std::string& num, const std::string& divisor){
+    std::string divisor_inverse = fixed_precision_inverse(divisor);
     return mult_float(num, divisor_inverse);
 }
 
@@ -667,7 +657,7 @@ std::string division(std::string num, std::string divisor){
 
 
 
-std::string inv(std::string a, std::string m)
+std::string modulo_inverse(std::string a, std::string m)
 {
     std::string m0 = m, t, q;
     std::string x0 = "0", x1 = "1";
@@ -712,9 +702,9 @@ std::string inv(std::string a, std::string m)
 
 std::string solve_chinese_remainder_th(std::string num[], std::string rem[], int k)
 {
-    // Compute product of all numbers
+    // Compute mult_all_nums of all numbers
 
-    auto ppp = [k, num] (int i) -> std::string {
+    auto mult_all_nums = [k, num] (int i) -> std::string {
         std::string prod = "1";
         for (int j = 0; j < k; j++) {
             if (j != i)
@@ -730,13 +720,13 @@ std::string solve_chinese_remainder_th(std::string num[], std::string rem[], int
     for (int i = 0; i < k; i++) {
 
 
-        std::string pp = ppp(i);
+        std::string product = mult_all_nums(i);
         result = sum_big_num(result, karatsuba_algorithm_multiplication(
-                             karatsuba_algorithm_multiplication(rem[i] ,inv(pp, num[i] ) )
-                                                                , pp));
+                karatsuba_algorithm_multiplication(rem[i] , modulo_inverse(product, num[i]) )
+                                                                , product));
     }
 
-    return remainder(result , ppp(k+1));
+    return remainder(result , mult_all_nums(k + 1));
 }
 
 
@@ -744,7 +734,7 @@ std::string solve_chinese_remainder_th(std::string num[], std::string rem[], int
 
 
 
-std::string modular_mult(std::string num1, std::string num2){
+std::string modular_mult(const std::string& num1, const std::string& num2){
 
 
     std::string m1 = "8388607";//2^23 - 1
